@@ -104,6 +104,24 @@ class BloxorzSuite extends FunSuite {
     }
   }
 
+  test("is done") {
+    new Level1 {
+      assert(done(Block(Pos(4,7),Pos(4,7))))
+    }
+  }
+
+  test("is not done because not standing") {
+    new Level1 {
+      assert(!done(Block(Pos(4,7),Pos(5,7))))
+    }
+  }
+
+  test("is not done because not on goal") {
+    new Level1 {
+      assert(!done(Block(Pos(4,8),Pos(4,8))))
+    }
+  }
+
   test("optimal solution for level 1") {
     new Level1 {
       assert(solve(solution) == Block(goal, goal))
