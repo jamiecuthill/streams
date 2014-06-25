@@ -40,6 +40,15 @@ class BloxorzSuite extends FunSuite {
     val optsolution = List(Right, Right, Down, Right, Right, Right, Down)
   }
 
+  trait VerySmallLevel extends SolutionChecker {
+    val level =
+      """ST
+        |oo
+        |oo""".stripMargin
+
+    val optsolution = List(Down, Right, Up)
+  }
+
   test("terrain function level 1") {
     new Level1 {
       assert(terrain(Pos(0,0)), "0,0")
@@ -122,15 +131,75 @@ class BloxorzSuite extends FunSuite {
     }
   }
 
+  test("neighbors with history is as expected") {
+    new Level1 {
+      val neighbors = neighborsWithHistory(Block(Pos(1, 1),Pos(1, 1)), List(Left, Up))
+      assert(neighbors === Set(
+        (Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
+        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+      ).toStream)
+    }
+  }
+
+  test("new neighbors only is as expected") {
+    new Level1 {
+      val newNeighbors = newNeighborsOnly(
+        neighborsWithHistory(Block(Pos(1, 1),Pos(1, 1)), List(Left, Up)),
+        Set(Block(Pos(1,2),Pos(1,3)), Block(Pos(1,1),Pos(1,1)))
+      )
+
+      assert(newNeighbors === Set(
+        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+      ).toStream)
+    }
+  }
+
+  test("small level from") {
+    new VerySmallLevel {
+      assert(from(Stream((startBlock, List())), Set(startBlock)) === Set(
+        (Block(Pos(0,0), Pos(0,0)), List()),
+        (Block(Pos(1,0), Pos(2,0)), List(Down)),
+        (Block(Pos(1,1), Pos(2,1)), List(Right, Down)),
+        (Block(Pos(0,1), Pos(0,1)), List(Up, Right, Down))
+      ).toStream)
+    }
+  }
+
+  test("paths from start") {
+    new VerySmallLevel {
+      assert(pathsFromStart === Set(
+        (Block(Pos(0,0), Pos(0,0)), List()),
+        (Block(Pos(1,0), Pos(2,0)), List(Down)),
+        (Block(Pos(1,1), Pos(2,1)), List(Right, Down)),
+        (Block(Pos(0,1), Pos(0,1)), List(Up, Right, Down))
+      ).toStream)
+    }
+  }
+
+  test("paths to goal") {
+    new VerySmallLevel {
+      assert(pathsToGoal === Set(
+        (Block(Pos(0,1), Pos(0,1)), List(Up, Right, Down))
+      ).toStream)
+    }
+  }
+
+  test("small optimal") {
+    new VerySmallLevel {
+      assert(solution === optsolution)
+    }
+  }
+
   test("optimal solution for level 1") {
     new Level1 {
-      assert(solve(solution) == Block(goal, goal))
+      assert(solution === optsolution)
+      assert(solve(solution) === Block(goal, goal))
     }
   }
 
   test("optimal solution length for level 1") {
     new Level1 {
-      assert(solution.length == optsolution.length)
+      assert(solution.length === optsolution.length)
     }
   }
 }
